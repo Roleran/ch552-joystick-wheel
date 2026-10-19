@@ -1,4 +1,32 @@
-# 使用说明
+# CH552 Joystick Wheel
+
+本仓库的固件用 PlatformIO 编译。需要已安装 [PlatformIO Core](https://platformio.org/)，命令是 `pio`。`HidKeyboardMouse` 是原作者用 Arduino（CH55xduino）写的参考代码，不要对它执行 `pio run`。
+
+## 拉取和编译
+
+```powershell
+git clone https://github.com/Roleran/ch552-joystick-wheel.git
+cd ".\ch552-joystick-wheel\firmware\ch552e-v1"
+pio run
+cd ".\ch552-joystick-wheel\firmware\ch552g-v2"
+pio run
+```
+
+`pio run` 用 SDCC 把对应目录的 C 代码编成 Intel HEX，并检查程序没有写进 CH552 的 bootloader 区（`0x3800` 以上）。成功后的烧录文件：
+
+- v1：`firmware/ch552e-v1/ch552e-v1.hex`
+- v2：`firmware/ch552g-v2/ch552g-v2.hex`
+
+`.pio` 是编译中间文件，已被 `.gitignore` 忽略，不要提交。
+
+## 目录
+
+- `firmware/ch552e-v1`：CH552E 单摇杆，PlatformIO 工程。
+- `firmware/ch552g-v2`：CH552G 双摇杆，PlatformIO 工程。
+- `firmware/软件架构.md`：给开发者看的实现说明。
+- `HidKeyboardMouse`：原作者代码，只供对照。入口是 `HidKeyboardMouse.ino`，USB 协议在 `src/userUsbHidKeyboardMouse`。旁边的 `HidKeyboardMouse.ino.ch552.hex` 是 Arduino 编出来的，不是本仓库的 PlatformIO 产物。
+
+## 使用说明
 
 电脑把设备识别成一个 USB 鼠标键盘，不需要安装驱动。v1 是 CH552E 单摇杆，v2 是 CH552G 双摇杆。
 
