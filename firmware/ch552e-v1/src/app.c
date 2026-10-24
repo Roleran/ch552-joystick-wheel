@@ -7,8 +7,8 @@
 /*
  * CH552E 单摇杆固件
  *
- *   P1.4  VX，只用来加快滚动，单独扳它不滚动
- *   P1.5  VY，滚动方向，鼠标模式里是上下
+ *   P1.4  上下。滚动方向，鼠标模式里是上下
+ *   P1.5  左右。只加快滚动，单独扳它不滚动；鼠标模式里是左右
  *   P1.6  按下切换模式，只在按下沿切换一次
  *   P1.7  WS2812，滚动蓝色，鼠标琥珀色
  *
@@ -31,6 +31,14 @@
 #define MOUSE_INTERVAL_MS 16
 #define BUTTON_DEBOUNCE_MS 30
 
+/* 灯色分量范围 0–255。上电默认是滚动蓝，这颗灯在个位数也会很亮。 */
+#define LED_SCROLL_R 0
+#define LED_SCROLL_G 0
+#define LED_SCROLL_B 3
+#define LED_MOUSE_R 4
+#define LED_MOUSE_G 2
+#define LED_MOUSE_B 0
+
 static __bit mouseMode = 0;
 static __bit keyStable = 1;
 static __bit keyLast = 1;
@@ -39,9 +47,9 @@ static uint32_t actionMs = 0;
 
 static void showMode(void) {
   if (mouseMode) {
-    ws2812Show(48, 24, 0);
+    ws2812Show(LED_MOUSE_R, LED_MOUSE_G, LED_MOUSE_B);
   } else {
-    ws2812Show(0, 0, 40);
+    ws2812Show(LED_SCROLL_R, LED_SCROLL_G, LED_SCROLL_B);
   }
 }
 
@@ -137,17 +145,22 @@ static void runMouse(int16_t vx, int16_t vy) {
 }
 
 void setup(void) {
+  /* 先拉低并写入暗色，避免数据线在 USB 初始化前抖动，灯珠锁存成高亮。 */
+  P1_7 = 0;
+  delayMicroseconds(80);
+  showMode();
+
   pinModeP1(BIT_VX, PIN_FLOAT);
   pinModeP1(BIT_VY, PIN_FLOAT);
   pinModeP1(BIT_KEY, PIN_PULLUP);
 
   USBInit();
-  showMode();
 }
 
 void loop(void) {
-  int16_t vx = stickValue(ADC_VX);
-  int16_t vy = stickValue(ADC_VY);
+  /* 实机左右在 P1.5、上下在 P1.4，读入时对调。 */
+  int16_t vx = stickValue(ADC_VY);
+  int16_t vy = stickValue(ADC_VX);
 
   pollButton();
   if (mouseMode) {

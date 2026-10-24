@@ -6,11 +6,13 @@
 /*
  * CH552G 双摇杆。
  *
- * 摇杆 1：P1.4 只加快滚动，P1.5 决定滚轮方向，P1.6 切换摇杆 2 的按键。
- * 摇杆 2：P1.1 / P3.2 移动鼠标。P1.7 默认鼠标左键，切换后按住发送回车。
+ * 摇杆 1：P1.4 上下，决定滚轮方向；P1.5 左右，只加快滚动。
+ *         P1.6 切换摇杆 2 的按键。
+ * 摇杆 2：P1.1 上下、P3.2 左右，移动鼠标。轴向和 v1 实机一致，读入时对调。
+ *         P1.7 默认鼠标左键，切换后按住发送回车。
  * P3.0 上、P3.1 下、P3.3 左、P3.4 右，始终是方向键。
  *
- * 滚动间隔：刚出死区 180ms，P1.5 打满 72ms，两轴都打满压到 36ms。
+ * 滚动间隔：刚出死区 180ms，P1.4 打满 72ms，两轴都打满压到 36ms。
  */
 
 #define ADC_CENTER 128
@@ -196,10 +198,11 @@ void setup(void) {
 }
 
 void loop(void) {
-  int16_t s1x = stickValue(ADC_S1_X);
-  int16_t s1y = stickValue(ADC_S1_Y);
-  int16_t s2x = stickValue(ADC_S2_X);
-  int16_t s2y = stickValue(ADC_S2_Y);
+  /* 和 v1 一样：标成 X 的脚是上下，标成 Y 的脚是左右。 */
+  int16_t s1x = stickValue(ADC_S1_Y);
+  int16_t s1y = stickValue(ADC_S1_X);
+  int16_t s2x = stickValue(ADC_S2_Y);
+  int16_t s2y = stickValue(ADC_S2_X);
   uint8_t edge;
 
   edge = pollKey(KEY_MODE, digitalReadP1(BIT_S1_KEY) == 0);
